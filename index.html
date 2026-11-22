@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="hi" class="h-full bg-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ऑल-इन-वन दुकानदार कैलकुलेटर (All-in-One Vyapar Calculator)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Hind', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              navy: '#1E3A8A',
+              navyHover: '#1D4ED8',
+              emerald: '#059669',
+              emeraldHover: '#047857',
+              accent: '#F59E0B',
+              bg: '#F5F7FA'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar for dynamic tab bar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Tactile button animations for mobile */
+    .btn-active:active { transform: scale(0.96); }
+    
+    /* Input focus custom style */
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+    }
+    
+    /* Hide number arrows */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body class="h-full font-sans bg-slate-100 text-slate-800 flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center text-xl font-bold shadow-inner">
+          🏪
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-1.5">
+            व्यापार व ऑल-इन-वन कैलकुलेटर
+          </h1>
+          <p class="text-xs text-indigo-200">Smart Vyapar & Utility Calculator</p>
+        </div>
+      </div>
+      <div id="live-time" class="hidden sm:block text-right text-xs text-indigo-200 font-medium"></div>
+    </div>
+
+    <!-- MAIN DESKTOP / TABLET TABS -->
+    <div class="border-t border-indigo-800/80 bg-indigo-950/60">
+      <div class="max-w-4xl mx-auto px-2">
+        <nav class="flex overflow-x-auto no-scrollbar space-x-1 py-1.5 px-1" id="tab-nav-header">
+          <button onclick="switchTab('vyapar')" id="head-tab-vyapar" class="tab-btn active-tab flex-shrink-0 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all">
+            <span>🏪</span> <span>व्यापार ऑफर <span class="text-[10px] opacity-75 font-normal">(Offers)</span></span>
+          </button>
+          <button onclick="switchTab('calc')" id="head-tab-calc" class="tab-btn flex-shrink-0 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all">
+            <span>🧮</span> <span>कैलकुलेटर <span class="text-[10px] opacity-75 font-normal">(Standard)</span></span>
+          </button>
+          <button onclick="switchTab('age')" id="head-tab-age" class="tab-btn flex-shrink-0 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all">
+            <span>🎂</span> <span>उम्र <span class="text-[10px] opacity-75 font-normal">(Age)</span></span>
+          </button>
+          <button onclick="switchTab('weight')" id="head-tab-weight" class="tab-btn flex-shrink-0 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all">
+            <span>⚖️</span> <span>वज़न <span class="text-[10px] opacity-75 font-normal">(Weight/Kirana)</span></span>
+          </button>
+          <button onclick="switchTab('length')" id="head-tab-length" class="tab-btn flex-shrink-0 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all">
+            <span>📏</span> <span>लंबाई <span class="text-[10px] opacity-75 font-normal">(Length)</span></span>
+          </button>
+          <button onclick="switchTab('gst')" id="head-tab-gst" class="tab-btn flex-shrink-0 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-2 transition-all">
+            <span>🧾</span> <span>GST व % <span class="text-[10px] opacity-75 font-normal">(GST & %)</span></span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-4 pb-24 md:pb-8">
+
+    <!-- ==================== TAB 1: VYAPAR OFFER ==================== -->
+    <div id="tab-vyapar" class="tab-content space-y-6">
+      <!-- Sub Nav for Vyapar Tools -->
+      <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-3 gap-1">
+        <button onclick="switchVyaparSub('sub-reverse')" id="sub-btn-reverse" class="sub-tab-btn px-2 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition text-center flex flex-col sm:flex-row items-center justify-center gap-1 bg-indigo-900 text-white shadow-sm">
+          <span>🔄</span> <span>उल्टा डिस्काउंट <span class="hidden sm:inline font-normal text-[11px] opacity-80">(Reverse)</span></span>
+        </button>
+        <button onclick="switchVyaparSub('sub-wholesale')" id="sub-btn-wholesale" class="sub-tab-btn px-2 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition text-center flex flex-col sm:flex-row items-center justify-center gap-1 text-slate-600 hover:bg-slate-100">
+          <span>📦</span> <span>थोक व रिटेल <span class="hidden sm:inline font-normal text-[11px] opacity-80">(Wholesale)</span></span>
+        </button>
+        <button onclick="switchVyaparSub('sub-normal')" id="sub-btn-normal" class="sub-tab-btn px-2 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition text-center flex flex-col sm:flex-row items-center justify-center gap-1 text-slate-600 hover:bg-slate-100">
+          <span>🏷️</span> <span>साधारण छूट <span class="hidden sm:inline font-normal text-[11px] opacity-80">(Discount)</span></span>
+        </button>
+      </div>
+
+      <!-- SUB TOOL A: REVERSE DISCOUNT -->
+      <div id="sub-reverse" class="vyapar-sub-content block space-y-4">
+        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+            <div>
+              <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+                <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-700">🎯</span>
+                उल्टा डिस्काउंट / लिस्ट प्राइस निकालें (Reverse MRP Calculator)
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">जितने में सामान बेचना है और जितना डिस्काउंट दिखाना है, उससे MRP जानें।</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                फाइनल बेचना है (Target Selling Price ₹)
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-3 text-slate-400 font-semibold text-lg">₹</span>
+                <input type="number" id="rev-target" value="88" step="any" oninput="calcReverseDiscount()" class="w-full pl-8 pr-3 py-2.5 text-lg font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:border-indigo-600 focus:bg-white transition" placeholder="e.g. 88">
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">वह दाम जो छूट के बाद ग्राहक को मिलना चाहिए</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ऑफर / छूट दिखानी है (Discount Offer %)
+              </label>
+              <div class="relative">
+                <input type="number" id="rev-discount" value="25" step="any" oninput="calcReverseDiscount()" class="w-full pl-3 pr-8 py-2.5 text-lg font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:border-indigo-600 focus:bg-white transition" placeholder="e.g. 25">
+                <span class="absolute right-3 top-3 text-slate-400 font-semibold text-lg">%</span>
+              </div>
+              <!-- Quick Discount Chips -->
+              <div class="flex gap-1.5 mt-2 overflow-x-auto">
+                <button onclick="setRevDisc(10)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">10%</button>
+                <button onclick="setRevDisc(15)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">15%</button>
+                <button onclick="setRevDisc(20)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">20%</button>
+                <button onclick="setRevDisc(25)" class="px-2.5 py-1 text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded-lg font-semibold">25%</button>
+                <button onclick="setRevDisc(30)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">30%</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exact Calculation Card -->
+          <div class="mt-6 p-4 rounded-xl bg-gradient-to-r from-indigo-900 to-indigo-800 text-white shadow-md">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center sm:text-left">
+              <div class="border-b sm:border-b-0 sm:border-r border-indigo-700/60 pb-3 sm:pb-0">
+                <span class="text-xs text-indigo-200 font-medium uppercase">सटीक लिस्ट प्राइस (Exact MRP)</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-amber-300 mt-1" id="rev-out-mrp">₹117.33</div>
+                <div class="text-[11px] text-indigo-200 mt-0.5">बिना किसी राउंड-ऑफ के</div>
+              </div>
+              <div class="border-b sm:border-b-0 sm:border-r border-indigo-700/60 pb-3 sm:pb-0">
+                <span class="text-xs text-indigo-200 font-medium uppercase">छूट की रकम (Discount Amount)</span>
+                <div class="text-2xl font-bold text-emerald-300 mt-1" id="rev-out-amt">₹29.33</div>
+                <div class="text-[11px] text-indigo-200 mt-0.5">ग्राहक की बचत</div>
+              </div>
+              <div>
+                <span class="text-xs text-indigo-200 font-medium uppercase">फाइनली ग्राहक देगा (Final Price)</span>
+                <div class="text-2xl font-bold text-white mt-1" id="rev-out-final">₹88.00</div>
+                <div class="text-[11px] text-emerald-300 mt-0.5">✓ ठीक लक्षित दाम</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smart Rounding Suggestions Table -->
+          <div class="mt-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-2 flex items-center justify-between">
+              <span>💡 बिल या पैकेट पर छापने के लिए आसान (Round-off) विकल्प</span>
+              <span class="text-xs font-normal text-slate-500">(Smart Round-Off Table)</span>
+            </h3>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                  <tr>
+                    <th class="p-2.5">राउंड MRP (List Price)</th>
+                    <th class="p-2.5">25% छूट (₹)</th>
+                    <th class="p-2.5">नया थोक दाम</th>
+                    <th class="p-2.5 text-right">अंतर (Diff)</th>
+                  </tr>
+                </thead>
+                <tbody id="rev-suggestions-body" class="divide-y divide-slate-100 bg-white">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- WhatsApp Share Button -->
+          <div class="mt-4 flex justify-end">
+            <button onclick="copyReverseSummary()" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition">
+              <span>📋</span> <span>व्हाट्सएप / कस्टमर के लिए कॉपी करें (Copy Summary)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB TOOL B: WHOLESALE & RETAIL OFFER -->
+      <div id="sub-wholesale" class="vyapar-sub-content hidden space-y-4">
+        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+          <div class="pb-3 mb-4 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+              <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">📦</span>
+              थोक व रिटेल ऑफर कैलकुलेटर (Wholesale & Retail Margin Calculator)
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">MRP पर थोक और रिटेल का डिस्काउंट %, मार्जिन और बल्क बिलिंग निकालें।</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">लिस्ट प्राइस / MRP (₹)</label>
+              <input type="number" id="wr-mrp" value="118" step="any" oninput="calcWholesaleRetail()" class="w-full px-3 py-2 text-base font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">थोक दाम (Wholesale ₹)</label>
+              <input type="number" id="wr-wholesale" value="88" step="any" oninput="calcWholesaleRetail()" class="w-full px-3 py-2 text-base font-bold text-emerald-700 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">रिटेल दाम (Retail ₹)</label>
+              <input type="number" id="wr-retail" value="102" step="any" oninput="calcWholesaleRetail()" class="w-full px-3 py-2 text-base font-bold text-indigo-700 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">आपकी खरीद/लागत <span class="text-slate-400 font-normal">(Cost ₹)</span></label>
+              <input type="number" id="wr-cost" value="" placeholder="ऐच्छिक (Optional)" step="any" oninput="calcWholesaleRetail()" class="w-full px-3 py-2 text-base font-medium text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+            </div>
+          </div>
+
+          <!-- Instant Output Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-5">
+            <!-- Wholesale Offer Card -->
+            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+              <span class="text-xs font-bold text-emerald-800 uppercase tracking-wide">📦 थोक ऑफर (Wholesale Offer)</span>
+              <div class="mt-2 text-2xl font-extrabold text-emerald-900" id="wr-out-ws-disc">25.42% OFF</div>
+              <div class="text-xs font-medium text-emerald-700 mt-0.5" id="wr-out-ws-amt">₹30.00 छूट (MRP से)</div>
+              <div class="text-[11px] text-emerald-800 mt-2 pt-2 border-t border-emerald-200/80" id="wr-out-ws-cost">
+                बेचने का दाम: ₹88.00
+              </div>
+            </div>
+
+            <!-- Retail Offer Card -->
+            <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
+              <span class="text-xs font-bold text-indigo-800 uppercase tracking-wide">🛍️ रिटेल ऑफर (Retail Offer)</span>
+              <div class="mt-2 text-2xl font-extrabold text-indigo-900" id="wr-out-rt-disc">13.56% OFF</div>
+              <div class="text-xs font-medium text-indigo-700 mt-0.5" id="wr-out-rt-amt">₹16.00 छूट (MRP से)</div>
+              <div class="text-[11px] text-indigo-800 mt-2 pt-2 border-t border-indigo-200/80" id="wr-out-rt-cost">
+                बेचने का दाम: ₹102.00
+              </div>
+            </div>
+
+            <!-- Retailer Profit / Margin Card -->
+            <div class="p-4 rounded-xl bg-amber-50 border border-amber-200">
+              <span class="text-xs font-bold text-amber-900 uppercase tracking-wide">💼 रिटेलर का मुनाफा (Retailer Margin)</span>
+              <div class="mt-2 text-2xl font-extrabold text-amber-900" id="wr-out-margin-amt">₹14.00 profit</div>
+              <div class="text-xs font-medium text-amber-800 mt-0.5" id="wr-out-margin-per">मार्काउप्प: 15.91% | मार्जिन: 13.73%</div>
+              <div class="text-[11px] text-amber-900 mt-2 pt-2 border-t border-amber-200/80">
+                (थोक में खरीद कर रिटेल में बेचने पर)
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Cost Profit Summary if cost is filled -->
+          <div id="wr-cost-summary-box" class="hidden mt-4 p-3.5 rounded-xl bg-slate-800 text-white text-xs sm:text-sm">
+            <div class="font-bold text-amber-400 mb-1">💰 आपकी लागत के अनुसार शुद्ध मुनाफा (Net Profit Summary):</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-200" id="wr-cost-summary-text">
+              <!-- JS Populated -->
+            </div>
+          </div>
+
+          <!-- Quick Bulk Bill Generator Section -->
+          <div class="mt-6 pt-5 border-t border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-1.5">
+                <span>🧮</span> पीस / क्वांटिटी बिल हिसाब (Bulk Quantity Billing)
+              </h3>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-600 font-medium">क्वांटिटी (Qty):</span>
+                <input type="number" id="wr-qty" value="10" min="1" oninput="calcWholesaleRetail()" class="w-20 px-2.5 py-1 text-sm font-bold bg-slate-50 border border-slate-300 rounded-lg text-center">
+              </div>
+            </div>
+
+            <!-- Quick Chips for Qty -->
+            <div class="flex gap-2 mb-3 overflow-x-auto">
+              <button onclick="setWRQty(5)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg">5 पीस</button>
+              <button onclick="setWRQty(10)" class="px-3 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-xs font-semibold rounded-lg">10 पीस</button>
+              <button onclick="setWRQty(20)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg">20 पीस</button>
+              <button onclick="setWRQty(60)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg">60 पीस</button>
+              <button onclick="setWRQty(100)" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg">100 पीस</button>
+            </div>
+
+            <!-- Bulk Output Table -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="text-[11px] text-slate-500 font-medium">कुल MRP बिल</div>
+                <div class="text-base font-bold text-slate-800 mt-0.5" id="wr-bulk-mrp">₹1,180</div>
+              </div>
+              <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <div class="text-[11px] text-emerald-800 font-medium">कुल थोक बिल (Wholesale)</div>
+                <div class="text-base font-bold text-emerald-700 mt-0.5" id="wr-bulk-ws">₹880</div>
+              </div>
+              <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+                <div class="text-[11px] text-indigo-800 font-medium">कुल रिटेल बिल (Retail)</div>
+                <div class="text-base font-bold text-indigo-700 mt-0.5" id="wr-bulk-rt">₹1,020</div>
+              </div>
+              <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <div class="text-[11px] text-amber-800 font-medium">थोक में कुल बचत</div>
+                <div class="text-base font-bold text-amber-700 mt-0.5" id="wr-bulk-save">₹300</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB TOOL C: NORMAL DISCOUNT -->
+      <div id="sub-normal" class="vyapar-sub-content hidden space-y-4">
+        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+          <div class="pb-3 mb-4 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+              <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-700">🏷️</span>
+              साधारण डिस्काउंट कैलकुलेटर (Standard Discount Calculator)
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">MRP और छूट % डालकर तुरंत अंतिम बिक्री मूल्य व बचत जानें।</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">एमआरपी / असली कीमत (MRP ₹)</label>
+              <div class="relative">
+                <span class="absolute left-3 top-3 text-slate-400 font-semibold">₹</span>
+                <input type="number" id="norm-mrp" value="500" step="any" oninput="calcNormalDiscount()" class="w-full pl-8 pr-3 py-2.5 text-lg font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">डिस्काउंट (Discount %)</label>
+              <div class="relative">
+                <input type="number" id="norm-disc" value="15" step="any" oninput="calcNormalDiscount()" class="w-full pl-3 pr-8 py-2.5 text-lg font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+                <span class="absolute right-3 top-3 text-slate-400 font-semibold">%</span>
+              </div>
+              <div class="flex gap-1.5 mt-2 overflow-x-auto">
+                <button onclick="setNormDisc(5)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">5%</button>
+                <button onclick="setNormDisc(10)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">10%</button>
+                <button onclick="setNormDisc(15)" class="px-2.5 py-1 text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded-lg font-semibold">15%</button>
+                <button onclick="setNormDisc(20)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">20%</button>
+                <button onclick="setNormDisc(50)" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium">50%</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-emerald-600 text-white">
+              <span class="text-xs font-medium text-emerald-100 uppercase">छूट के बाद फाइनल दाम (Final Price)</span>
+              <div class="text-3xl font-extrabold mt-1" id="norm-out-final">₹425.00</div>
+              <div class="text-xs text-emerald-100 mt-1">ग्राहक को इतना देना होगा</div>
+            </div>
+            <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
+              <span class="text-xs font-bold text-indigo-800 uppercase">कुल बचत (Discount Savings)</span>
+              <div class="text-3xl font-extrabold text-indigo-900 mt-1" id="norm-out-savings">₹75.00</div>
+              <div class="text-xs text-indigo-600 mt-1">MRP से बचाई गई राशि</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TAB 2: STANDARD CALCULATOR ==================== -->
+    <div id="tab-calc" class="tab-content hidden space-y-4">
+      <div class="max-w-md mx-auto bg-white rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-200">
+        <!-- Display Header -->
+        <div class="bg-slate-900 text-white rounded-2xl p-4 mb-4 text-right shadow-inner min-h-[100px] flex flex-col justify-end">
+          <div id="calc-expression" class="text-sm font-medium text-slate-400 h-6 overflow-x-auto no-scrollbar whitespace-nowrap"></div>
+          <div id="calc-display" class="text-3xl sm:text-4xl font-extrabold tracking-wider text-white overflow-x-auto no-scrollbar whitespace-nowrap mt-1">0</div>
+        </div>
+
+        <!-- Keypad Grid -->
+        <div class="grid grid-cols-4 gap-2.5">
+          <!-- Row 1 -->
+          <button onclick="calcKey('AC')" class="btn-active py-3.5 text-base font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-2xl transition">AC</button>
+          <button onclick="calcKey('DEL')" class="btn-active py-3.5 text-base font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-2xl transition">⌫</button>
+          <button onclick="calcKey('%')" class="btn-active py-3.5 text-base font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-2xl transition">%</button>
+          <button onclick="calcKey('/')" class="btn-active py-3.5 text-lg font-bold text-white bg-indigo-900 hover:bg-indigo-800 rounded-2xl transition">÷</button>
+
+          <!-- Row 2 -->
+          <button onclick="calcKey('7')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">7</button>
+          <button onclick="calcKey('8')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">8</button>
+          <button onclick="calcKey('9')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">9</button>
+          <button onclick="calcKey('*')" class="btn-active py-3.5 text-lg font-bold text-white bg-indigo-900 hover:bg-indigo-800 rounded-2xl transition">×</button>
+
+          <!-- Row 3 -->
+          <button onclick="calcKey('4')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">4</button>
+          <button onclick="calcKey('5')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">5</button>
+          <button onclick="calcKey('6')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">6</button>
+          <button onclick="calcKey('-')" class="btn-active py-3.5 text-xl font-bold text-white bg-indigo-900 hover:bg-indigo-800 rounded-2xl transition">−</button>
+
+          <!-- Row 4 -->
+          <button onclick="calcKey('1')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">1</button>
+          <button onclick="calcKey('2')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">2</button>
+          <button onclick="calcKey('3')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">3</button>
+          <button onclick="calcKey('+')" class="btn-active py-3.5 text-xl font-bold text-white bg-indigo-900 hover:bg-indigo-800 rounded-2xl transition">+</button>
+
+          <!-- Row 5 -->
+          <button onclick="calcKey('00')" class="btn-active py-3.5 text-lg font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">00</button>
+          <button onclick="calcKey('0')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">0</button>
+          <button onclick="calcKey('.')" class="btn-active py-3.5 text-xl font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200/60 shadow-sm transition">.</button>
+          <button onclick="calcKey('=')" class="btn-active py-3.5 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-md transition">=</button>
+        </div>
+
+        <!-- History Accordion -->
+        <div class="mt-4 pt-3 border-t border-slate-100">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1">📜 हालिया गणनाएं (History)</span>
+            <button onclick="clearCalcHistory()" class="text-red-500 hover:text-red-700 font-semibold text-[11px]">इतिहास साफ़ करें</button>
+          </div>
+          <div id="calc-history-list" class="space-y-1.5 max-h-36 overflow-y-auto text-xs no-scrollbar">
+            <div class="text-slate-400 italic text-center py-2">कोई हालिया गणना नहीं है</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TAB 3: AGE CALCULATOR ==================== -->
+    <div id="tab-age" class="tab-content hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <div class="pb-3 mb-4 border-b border-slate-100">
+          <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-700">🎂</span>
+            उम्र कैलकुलेटर (Age & Birthday Calculator)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">सटीक उम्र, अगले जन्मदिन का समय और कुल दिनों का हिसाब लगाएं।</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">जन्म तिथि (Date of Birth)</label>
+            <input type="date" id="age-dob" onchange="calculateAge()" class="w-full px-3 py-2.5 text-base font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">आज की / लक्षित तारीख (Target Date)</label>
+            <input type="date" id="age-target" onchange="calculateAge()" class="w-full px-3 py-2.5 text-base font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+          </div>
+        </div>
+
+        <!-- Primary Age Output Grid -->
+        <div class="mt-6 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-indigo-900 to-indigo-800 text-white shadow-md">
+          <span class="text-xs font-medium text-indigo-200 uppercase tracking-wide">वर्तमान सटीक उम्र (Exact Age)</span>
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+            <div class="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
+              <div id="age-years" class="text-3xl sm:text-4xl font-extrabold text-amber-300">0</div>
+              <div class="text-xs text-indigo-100 font-medium mt-1">साल (Years)</div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
+              <div id="age-months" class="text-3xl sm:text-4xl font-extrabold text-white">0</div>
+              <div class="text-xs text-indigo-100 font-medium mt-1">महीने (Months)</div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
+              <div id="age-days" class="text-3xl sm:text-4xl font-extrabold text-emerald-300">0</div>
+              <div class="text-xs text-indigo-100 font-medium mt-1">दिन (Days)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Birthday Banner -->
+        <div class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🎉</span>
+            <div>
+              <div class="text-xs font-bold text-amber-900 uppercase">अगला जन्मदिन (Next Birthday)</div>
+              <div id="next-bday-text" class="text-sm font-semibold text-amber-950 mt-0.5">तारीख चुनें...</div>
+            </div>
+          </div>
+          <div id="next-bday-day" class="text-xs font-bold px-3 py-1.5 bg-amber-200 text-amber-900 rounded-lg">
+            ---
+          </div>
+        </div>
+
+        <!-- Detailed Lifetime Statistics -->
+        <div class="mt-5">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">📊 जीवन के कुल आंकड़े (Total Summary)</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center text-xs">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-slate-500 font-medium">कुल महीने</div>
+              <div id="stat-months" class="text-base font-bold text-slate-800 mt-1">0</div>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-slate-500 font-medium">कुल सप्ताह</div>
+              <div id="stat-weeks" class="text-base font-bold text-slate-800 mt-1">0</div>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-slate-500 font-medium">कुल दिन</div>
+              <div id="stat-days" class="text-base font-bold text-slate-800 mt-1">0</div>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-slate-500 font-medium">जन्म का दिन</div>
+              <div id="stat-birth-day" class="text-base font-bold text-indigo-700 mt-1">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TAB 4: WEIGHT CONVERTER & KIRANA ==================== -->
+    <div id="tab-weight" class="tab-content hidden space-y-6">
+      
+      <!-- PART A: KIRANA RATE HELPER -->
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <div class="pb-3 mb-4 border-b border-slate-100">
+          <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">🛒</span>
+            किराना व ग्राम भाव कैलकुलेटर (Kirana Rate Calculator)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">1 किलो का भाव डालें और ग्राम या रुपये का सटीक हिसाब तुरंत पाएं।</p>
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">1 किलोग्राम (1 kg) का रेट (₹)</label>
+          <div class="relative max-w-sm">
+            <span class="absolute left-3 top-3 text-slate-400 font-semibold text-lg">₹</span>
+            <input type="number" id="kirana-rate" value="260" step="any" oninput="calcKirana()" class="w-full pl-8 pr-3 py-2.5 text-xl font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Tool 1: Weight to Rupees -->
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+              <span>⚖️</span> <span>वज़न से रुपये निकालें (Weight → ₹)</span>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">कितने ग्राम देना है? (Grams)</label>
+              <input type="number" id="kirana-grams" value="250" step="any" oninput="calcKirana('grams')" class="w-full px-3 py-2 font-bold text-slate-800 bg-white border border-slate-300 rounded-xl">
+              <!-- Quick Chips -->
+              <div class="flex gap-1.5 mt-2 overflow-x-auto">
+                <button onclick="setKiranaGrams(50)" class="px-2 py-1 text-xs bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">50g</button>
+                <button onclick="setKiranaGrams(100)" class="px-2 py-1 text-xs bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">100g</button>
+                <button onclick="setKiranaGrams(250)" class="px-2 py-1 text-xs bg-indigo-100 border border-indigo-200 text-indigo-900 rounded-lg font-bold">250g</button>
+                <button onclick="setKiranaGrams(500)" class="px-2 py-1 text-xs bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">500g</button>
+              </div>
+            </div>
+            <div class="p-3 bg-emerald-600 text-white rounded-xl text-center">
+              <span class="text-[11px] text-emerald-100 uppercase font-medium">सटीक दाम (Price)</span>
+              <div class="text-2xl font-extrabold mt-0.5" id="kirana-out-rs">₹65.00</div>
+            </div>
+          </div>
+
+          <!-- Tool 2: Rupees to Weight -->
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+              <span>💵</span> <span>रुपये से वज़न निकालें (₹ → Weight)</span>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">ग्राहक ने कितने रुपये दिए? (₹ Amount)</label>
+              <input type="number" id="kirana-rs" value="50" step="any" oninput="calcKirana('rs')" class="w-full px-3 py-2 font-bold text-slate-800 bg-white border border-slate-300 rounded-xl">
+              <!-- Quick Chips -->
+              <div class="flex gap-1.5 mt-2 overflow-x-auto">
+                <button onclick="setKiranaRs(10)" class="px-2 py-1 text-xs bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">₹10</button>
+                <button onclick="setKiranaRs(20)" class="px-2 py-1 text-xs bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">₹20</button>
+                <button onclick="setKiranaRs(50)" class="px-2 py-1 text-xs bg-indigo-100 border border-indigo-200 text-indigo-900 rounded-lg font-bold">₹50</button>
+                <button onclick="setKiranaRs(100)" class="px-2 py-1 text-xs bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium">₹100</button>
+              </div>
+            </div>
+            <div class="p-3 bg-indigo-900 text-white rounded-xl text-center">
+              <span class="text-[11px] text-indigo-200 uppercase font-medium">तोलने योग्य वज़न (Weight to give)</span>
+              <div class="text-2xl font-extrabold text-amber-300 mt-0.5" id="kirana-out-weight">192.31 Grams</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART B: UNIVERSAL WEIGHT CONVERTER -->
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <div class="pb-3 mb-4 border-b border-slate-100">
+          <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-700">⚖️</span>
+            सर्वव्यापी वज़न कन्वर्टर (Universal Weight Converter)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">किलो, ग्राम, क्विंटल, टन, पाउंड, तोला, पाव आदि में एक साथ बदलें।</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">संख्या (Value)</label>
+            <input type="number" id="weight-input" value="1" step="any" oninput="convertWeight()" class="w-full px-3 py-2.5 text-lg font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">इकाई चुनें (Select Unit)</label>
+            <select id="weight-unit" onchange="convertWeight()" class="w-full px-3 py-2.5 text-base font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+              <option value="kg" selected>किलोग्राम (Kilogram - kg)</option>
+              <option value="g">ग्राम (Gram - g)</option>
+              <option value="mg">मिलीग्राम (Milligram - mg)</option>
+              <option value="quintal">क्विंटल (Quintal - 100kg)</option>
+              <option value="ton">टन (Metric Ton - 1000kg)</option>
+              <option value="lb">पाउंड (Pound - lb)</option>
+              <option value="oz">औंस (Ounce - oz)</option>
+              <option value="tola">तोला (Tola - 11.66g)</option>
+              <option value="pao">पाव (Pao - 250g)</option>
+              <option value="ser">सेर (Ser - 933.1g)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Converted Results Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5" id="weight-grid">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TAB 5: LENGTH CONVERTER ==================== -->
+    <div id="tab-length" class="tab-content hidden space-y-6">
+      
+      <!-- UNIVERSAL LENGTH CONVERTER -->
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <div class="pb-3 mb-4 border-b border-slate-100">
+          <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-700">📏</span>
+            लंबाई व दूरी कन्वर्टर (Universal Length Converter)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">मीटर, फुट, इंच, गज, किलोमीटर, सेंटीमीटर को तुरंत बदलें।</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">माप दर्ज करें (Value)</label>
+            <input type="number" id="length-input" value="10" step="any" oninput="convertLength()" class="w-full px-3 py-2.5 text-lg font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">इकाई चुनें (Select Unit)</label>
+            <select id="length-unit" onchange="convertLength()" class="w-full px-3 py-2.5 text-base font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+              <option value="ft" selected>फुट (Feet - ft)</option>
+              <option value="m">मीटर (Meter - m)</option>
+              <option value="cm">सेंटीमीटर (Centimeter - cm)</option>
+              <option value="mm">मिलीमीटर (Millimeter - mm)</option>
+              <option value="km">किलोमीटर (Kilometer - km)</option>
+              <option value="inch">इंच (Inch - in)</option>
+              <option value="yard">गज (Yard / Gaz)</option>
+              <option value="mile">मील (Mile)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Converted Results Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="length-grid">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+
+      <!-- FEET + INCHES TO CM TOOL -->
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-900 text-sm sm:text-base mb-3 flex items-center gap-2">
+          <span>📐</span> फुट + इंच को सेमी में बदलें (Feet + Inches → cm)
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">फुट (Feet)</label>
+            <input type="number" id="ft-part" value="5" step="any" oninput="calcFeetInchToCm()" class="w-full px-3 py-2 font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">इंच (Inches)</label>
+            <input type="number" id="in-part" value="8" step="any" oninput="calcFeetInchToCm()" class="w-full px-3 py-2 font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl">
+          </div>
+          <div class="p-3 bg-indigo-900 text-white rounded-xl text-center">
+            <div class="text-[11px] text-indigo-200 font-medium">कुल सेंटीमीटर (Total cm)</div>
+            <div id="ft-inch-out-cm" class="text-xl font-bold text-amber-300 mt-0.5">172.72 cm</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TAB 6: GST & PERCENTAGE ==================== -->
+    <div id="tab-gst" class="tab-content hidden space-y-6">
+      
+      <!-- GST CALCULATOR -->
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <div class="pb-3 mb-4 border-b border-slate-100">
+          <h2 class="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-700">🧾</span>
+            GST कैलकुलेटर (GST Calculator - Add & Remove)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">जीएसटी जोड़ने या घटाने के बाद मूल रकम, CGST और SGST निकालें।</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">रकम / अमाउंट (Amount ₹)</label>
+            <div class="relative">
+              <span class="absolute left-3 top-3 text-slate-400 font-semibold text-lg">₹</span>
+              <input type="number" id="gst-amount" value="1000" step="any" oninput="calcGST()" class="w-full pl-8 pr-3 py-2.5 text-lg font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">GST का प्रकार (Calculation Type)</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="setGSTMode('add')" id="gst-mode-add" class="py-2.5 text-xs font-bold rounded-xl transition bg-indigo-900 text-white">
+                + GST जोड़ें (Add)
+              </button>
+              <button onclick="setGSTMode('remove')" id="gst-mode-remove" class="py-2.5 text-xs font-bold rounded-xl transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+                − GST निकालें (Remove)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GST Rate Chips -->
+        <div class="mt-4">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">GST दर चुनें (Select Rate %)</label>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="setGSTRate(3)" class="gst-chip px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50">3%</button>
+            <button onclick="setGSTRate(5)" class="gst-chip px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50">5%</button>
+            <button onclick="setGSTRate(12)" class="gst-chip px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50">12%</button>
+            <button onclick="setGSTRate(18)" class="gst-chip active-gst-chip px-3 py-1.5 text-xs font-bold rounded-lg bg-indigo-900 text-white">18%</button>
+            <button onclick="setGSTRate(28)" class="gst-chip px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50">28%</button>
+            <div class="flex items-center gap-1 ml-auto">
+              <span class="text-xs text-slate-500">कस्टम %:</span>
+              <input type="number" id="gst-rate" value="18" step="any" oninput="calcGST()" class="w-16 px-2 py-1 text-xs font-bold border border-slate-300 rounded-lg text-center">
+            </div>
+          </div>
+        </div>
+
+        <!-- GST Output Summary -->
+        <div class="mt-6 p-4 rounded-xl bg-slate-900 text-white space-y-3">
+          <div class="flex justify-between items-center text-xs text-slate-300 pb-2 border-b border-slate-800">
+            <span>मूल कीमत (Base Amount)</span>
+            <span id="gst-out-base" class="text-base font-bold text-white">₹847.46</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
+            <div>CGST (<span id="gst-cgst-rate">9</span>%): <strong id="gst-out-cgst" class="text-slate-100">₹76.27</strong></div>
+            <div>SGST (<span id="gst-sgst-rate">9</span>%): <strong id="gst-out-sgst" class="text-slate-100">₹76.27</strong></div>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+            <div>
+              <div class="text-xs text-slate-400">कुल GST रकम (Total Tax)</div>
+              <div id="gst-out-tax" class="text-lg font-bold text-amber-400">₹152.54</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-emerald-400 font-medium">अंतिम कुल बिल (Total Amount)</div>
+              <div id="gst-out-total" class="text-2xl font-extrabold text-emerald-400">₹1,000.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK PERCENTAGE CALCULATOR -->
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-900 text-sm sm:text-base mb-3 flex items-center gap-2">
+          <span>%</span> त्वरित प्रतिशत टूल (Quick Percentage Helper)
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Percentage Tool A -->
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <span class="text-xs font-bold text-slate-700">1. X का Y% कितना होगा?</span>
+            <div class="flex items-center gap-2">
+              <input type="number" id="pct-val1" value="500" oninput="calcPct1()" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg" placeholder="रकम X">
+              <span class="text-xs font-bold">का</span>
+              <input type="number" id="pct-pct1" value="12" oninput="calcPct1()" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg" placeholder="% Y">
+              <span class="text-xs font-bold">%</span>
+            </div>
+            <div class="text-xs font-bold text-indigo-900 pt-1">
+              उत्तर: <span id="pct-out1" class="text-sm font-extrabold text-emerald-700">₹60.00</span>
+            </div>
+          </div>
+
+          <!-- Percentage Tool B -->
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <span class="text-xs font-bold text-slate-700">2. X, Y का कितना % है?</span>
+            <div class="flex items-center gap-2">
+              <input type="number" id="pct-val2" value="45" oninput="calcPct2()" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg" placeholder="संख्या X">
+              <span class="text-xs font-bold">/</span>
+              <input type="number" id="pct-total2" value="300" oninput="calcPct2()" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg" placeholder="कुल Y">
+            </div>
+            <div class="text-xs font-bold text-indigo-900 pt-1">
+              उत्तर: <span id="pct-out2" class="text-sm font-extrabold text-emerald-700">15.00%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- MOBILE STICKY BOTTOM NAVIGATION BAR -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 bg-indigo-950 text-slate-300 border-t border-indigo-800/80 shadow-2xl z-50">
+    <div class="grid grid-cols-6 text-center text-[10px] font-medium py-1">
+      <button onclick="switchTab('vyapar')" id="bot-tab-vyapar" class="py-1.5 flex flex-col items-center gap-0.5 text-amber-400 font-bold">
+        <span class="text-base">🏪</span>
+        <span class="truncate">व्यापार</span>
+      </button>
+      <button onclick="switchTab('calc')" id="bot-tab-calc" class="py-1.5 flex flex-col items-center gap-0.5">
+        <span class="text-base">🧮</span>
+        <span class="truncate">कैलकुलेटर</span>
+      </button>
+      <button onclick="switchTab('age')" id="bot-tab-age" class="py-1.5 flex flex-col items-center gap-0.5">
+        <span class="text-base">🎂</span>
+        <span class="truncate">उम्र</span>
+      </button>
+      <button onclick="switchTab('weight')" id="bot-tab-weight" class="py-1.5 flex flex-col items-center gap-0.5">
+        <span class="text-base">⚖️</span>
+        <span class="truncate">वज़न</span>
+      </button>
+      <button onclick="switchTab('length')" id="bot-tab-length" class="py-1.5 flex flex-col items-center gap-0.5">
+        <span class="text-base">📏</span>
+        <span class="truncate">लंबाई</span>
+      </button>
+      <button onclick="switchTab('gst')" id="bot-tab-gst" class="py-1.5 flex flex-col items-center gap-0.5">
+        <span class="text-base">🧾</span>
+        <span class="truncate">GST/%</span>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 pointer-events-none space-y-2"></div>
+
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // GLOBAL STATE
+    let currentTab = 'vyapar';
+    let currentVyaparSub = 'sub-reverse';
+    let gstMode = 'add';
+    let calcExpr = '';
+    let calcHistory = [];
+
+    // --- TAB SWITCHING ---
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      // Update Desktop Header Nav Styles
+      document.querySelectorAll('#tab-nav-header button').forEach(btn => {
+        btn.classList.remove('bg-indigo-700', 'text-white', 'shadow');
+        btn.classList.add('text-indigo-200', 'hover:bg-indigo-800/50');
+      });
+      const activeHead = document.getElementById(`head-tab-${tabId}`);
+      if (activeHead) {
+        activeHead.classList.add('bg-indigo-700', 'text-white', 'shadow');
+        activeHead.classList.remove('text-indigo-200');
+      }
+
+      // Update Mobile Bottom Nav Styles
+      const botTabBtns = ['vyapar', 'calc', 'age', 'weight', 'length', 'gst'];
+      botTabBtns.forEach(id => {
+        const btn = document.getElementById(`bot-tab-${id}`);
+        if (btn) {
+          if (id === tabId) {
+            btn.className = 'py-1.5 flex flex-col items-center gap-0.5 text-amber-400 font-bold';
+          } else {
+            btn.className = 'py-1.5 flex flex-col items-center gap-0.5 text-indigo-300 hover:text-white';
+          }
+        }
+      });
+    }
+
+    function switchVyaparSub(subId) {
+      currentVyaparSub = subId;
+      document.querySelectorAll('.vyapar-sub-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(subId).classList.remove('hidden');
+
+      // Buttons
+      ['reverse', 'wholesale', 'normal'].forEach(name => {
+        const btn = document.getElementById(`sub-btn-${name}`);
+        if (`sub-${name}` === subId) {
+          btn.className = 'sub-tab-btn px-2 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition text-center flex flex-col sm:flex-row items-center justify-center gap-1 bg-indigo-900 text-white shadow-sm';
+        } else {
+          btn.className = 'sub-tab-btn px-2 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition text-center flex flex-col sm:flex-row items-center justify-center gap-1 text-slate-600 hover:bg-slate-100';
+        }
+      });
+    }
+
+    // --- TOAST FUNCTION ---
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'bg-slate-900 text-white text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-bounce pointer-events-auto';
+      toast.innerHTML = `<span>✅</span> <span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 2500);
+    }
+
+
+    // ==================== TAB 1: VYAPAR OFFER LOGIC ====================
+
+    // 1A. REVERSE DISCOUNT
+    function calcReverseDiscount() {
+      const target = parseFloat(document.getElementById('rev-target').value) || 0;
+      const discount = parseFloat(document.getElementById('rev-discount').value) || 0;
+
+      if (target <= 0 || discount >= 100 || discount < 0) {
+        document.getElementById('rev-out-mrp').innerText = '₹0.00';
+        document.getElementById('rev-out-amt').innerText = '₹0.00';
+        document.getElementById('rev-out-final').innerText = '₹0.00';
+        document.getElementById('rev-suggestions-body').innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">वैध आंकड़े दर्ज करें</td></tr>';
+        return;
+      }
+
+      // Exact Formula: MRP = Target / (1 - d/100)
+      const exactMRP = target / (1 - (discount / 100));
+      const discountAmt = exactMRP - target;
+
+      document.getElementById('rev-out-mrp').innerText = `₹${exactMRP.toFixed(2)}`;
+      document.getElementById('rev-out-amt').innerText = `₹${discountAmt.toFixed(2)}`;
+      document.getElementById('rev-out-final').innerText = `₹${target.toFixed(2)}`;
+
+      // Generate Smart Round-off Suggestions
+      const floorVal = Math.floor(exactMRP);
+      const ceilVal = Math.ceil(exactMRP);
+      const near5Val = Math.round(exactMRP / 5) * 5;
+      const near10Val = Math.round(exactMRP / 10) * 10;
+
+      // Unique sorted list of suggested MRPs
+      const suggestions = Array.from(new Set([exactMRP, floorVal, ceilVal, near5Val, near10Val]))
+        .filter(val => val > 0)
+        .sort((a, b) => a - b);
+
+      let tbodyHTML = '';
+      suggestions.forEach(mrpVal => {
+        const isExact = Math.abs(mrpVal - exactMRP) < 0.001;
+        const afterDiscPrice = mrpVal * (1 - (discount / 100));
+        const discRs = mrpVal - afterDiscPrice;
+        const diffFromTarget = afterDiscPrice - target;
+
+        let diffBadge = '';
+        if (Math.abs(diffFromTarget) < 0.01) {
+          diffBadge = `<span class="text-emerald-600 font-bold">ठीक ₹${target}</span>`;
+        } else if (diffFromTarget > 0) {
+          diffBadge = `<span class="text-amber-600 font-medium">+${diffFromTarget.toFixed(2)} पैसे ज्यादा</span>`;
+        } else {
+          diffBadge = `<span class="text-indigo-600 font-medium">${Math.abs(diffFromTarget).toFixed(2)} पैसे कम</span>`;
+        }
+
+        tbodyHTML += `
+          <tr class="${isExact ? 'bg-amber-50 font-bold' : 'hover:bg-slate-50'} transition">
+            <td class="p-2.5">
+              ${isExact ? `<span class="text-indigo-900">₹${mrpVal.toFixed(2)} (सटीक)</span>` : `₹${mrpVal}`}
+            </td>
+            <td class="p-2.5 text-slate-600">₹${discRs.toFixed(2)}</td>
+            <td class="p-2.5 font-bold text-slate-800">₹${afterDiscPrice.toFixed(2)}</td>
+            <td class="p-2.5 text-right">${diffBadge}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('rev-suggestions-body').innerHTML = tbodyHTML;
+    }
+
+    function setRevDisc(val) {
+      document.getElementById('rev-discount').value = val;
+      calcReverseDiscount();
+    }
+
+    function copyReverseSummary() {
+      const target = parseFloat(document.getElementById('rev-target').value) || 0;
+      const disc = parseFloat(document.getElementById('rev-discount').value) || 0;
+      const mrp = document.getElementById('rev-out-mrp').innerText;
+      const discAmt = document.getElementById('rev-out-amt').innerText;
+
+      const summaryText = `🛒 *ऑफर एवं डिस्काउंट विवरण*\n----------------------------------\n• लिस्ट प्राइस (MRP): ${mrp}\n• डिस्काउंट ऑफर: ${disc}%\n• छूट की रकम: ${discAmt}\n• थोक/फाइनल रेट: ₹${target.toFixed(2)}\n----------------------------------\n(Generated via ऑल-इन-वन स्मार्ट कैलकुलेटर)`;
+
+      document.execCommand('copy');
+      // Alternative fallback clipboard
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(summaryText);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = summaryText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      showToast("व्हाट्सएप मैसेज कॉपी हो गया!");
+    }
+
+
+    // 1B. WHOLESALE & RETAIL OFFER
+    function calcWholesaleRetail() {
+      const mrp = parseFloat(document.getElementById('wr-mrp').value) || 0;
+      const ws = parseFloat(document.getElementById('wr-wholesale').value) || 0;
+      const rt = parseFloat(document.getElementById('wr-retail').value) || 0;
+      const cost = parseFloat(document.getElementById('wr-cost').value);
+      const qty = parseInt(document.getElementById('wr-qty').value) || 1;
+
+      if (mrp <= 0) return;
+
+      // Wholesale Off
+      const wsAmt = mrp - ws;
+      const wsDiscPct = (wsAmt / mrp) * 100;
+
+      // Retail Off
+      const rtAmt = mrp - rt;
+      const rtDiscPct = (rtAmt / mrp) * 100;
+
+      // Retailer Margin (buying wholesale, selling retail)
+      const retailerMarginAmt = rt - ws;
+      const markupPct = ws > 0 ? (retailerMarginAmt / ws) * 100 : 0;
+      const marginPct = rt > 0 ? (retailerMarginAmt / rt) * 100 : 0;
+
+      document.getElementById('wr-out-ws-disc').innerText = `${wsDiscPct.toFixed(2)}% OFF`;
+      document.getElementById('wr-out-ws-amt').innerText = `₹${wsAmt.toFixed(2)} छूट (MRP से)`;
+      document.getElementById('wr-out-ws-cost').innerText = `बेचने का थोक दाम: ₹${ws.toFixed(2)}`;
+
+      document.getElementById('wr-out-rt-disc').innerText = `${rtDiscPct.toFixed(2)}% OFF`;
+      document.getElementById('wr-out-rt-amt').innerText = `₹${rtAmt.toFixed(2)} छूट (MRP से)`;
+      document.getElementById('wr-out-rt-cost').innerText = `बेचने का रिटेल दाम: ₹${rt.toFixed(2)}`;
+
+      document.getElementById('wr-out-margin-amt').innerText = `₹${retailerMarginAmt.toFixed(2)} मुनाफा`;
+      document.getElementById('wr-out-margin-per').innerText = `मार्काउप: ${markupPct.toFixed(2)}% | मार्जिन: ${marginPct.toFixed(2)}%`;
+
+      // Net Cost Profit Summary
+      const costBox = document.getElementById('wr-cost-summary-box');
+      const costText = document.getElementById('wr-cost-summary-text');
+      if (!isNaN(cost) && cost > 0) {
+        costBox.classList.remove('hidden');
+        const wsProfit = ws - cost;
+        const wsProfitMargin = (wsProfit / ws) * 100;
+        const rtProfit = rt - cost;
+        const rtProfitMargin = (rtProfit / rt) * 100;
+
+        costText.innerHTML = `
+          <div>📦 <strong>थोक पर आपका मुनाफा:</strong> ₹${wsProfit.toFixed(2)} प्रति पीस (${wsProfitMargin.toFixed(2)}% मार्जिन)</div>
+          <div>🛍️ <strong>रिटेल पर आपका मुनाफा:</strong> ₹${rtProfit.toFixed(2)} प्रति पीस (${rtProfitMargin.toFixed(2)}% मार्जिन)</div>
+        `;
+      } else {
+        costBox.classList.add('hidden');
+      }
+
+      // Bulk Billing
+      const bulkMRP = mrp * qty;
+      const bulkWS = ws * qty;
+      const bulkRT = rt * qty;
+      const bulkSave = bulkMRP - bulkWS;
+
+      document.getElementById('wr-bulk-mrp').innerText = `₹${bulkMRP.toLocaleString('en-IN')}`;
+      document.getElementById('wr-bulk-ws').innerText = `₹${bulkWS.toLocaleString('en-IN')}`;
+      document.getElementById('wr-bulk-rt').innerText = `₹${bulkRT.toLocaleString('en-IN')}`;
+      document.getElementById('wr-bulk-save').innerText = `₹${bulkSave.toLocaleString('en-IN')}`;
+    }
+
+    function setWRQty(q) {
+      document.getElementById('wr-qty').value = q;
+      calcWholesaleRetail();
+    }
+
+
+    // 1C. NORMAL DISCOUNT
+    function calcNormalDiscount() {
+      const mrp = parseFloat(document.getElementById('norm-mrp').value) || 0;
+      const disc = parseFloat(document.getElementById('norm-disc').value) || 0;
+
+      const savings = mrp * (disc / 100);
+      const finalPrice = mrp - savings;
+
+      document.getElementById('norm-out-final').innerText = `₹${Math.max(0, finalPrice).toFixed(2)}`;
+      document.getElementById('norm-out-savings').innerText = `₹${Math.max(0, savings).toFixed(2)}`;
+    }
+
+    function setNormDisc(val) {
+      document.getElementById('norm-disc').value = val;
+      calcNormalDiscount();
+    }
+
+
+    // ==================== TAB 2: STANDARD CALCULATOR LOGIC ====================
+
+    function updateCalcDisplay() {
+      document.getElementById('calc-expression').innerText = calcExpr || '';
+    }
+
+    function calcKey(key) {
+      const display = document.getElementById('calc-display');
+
+      if (key === 'AC') {
+        calcExpr = '';
+        display.innerText = '0';
+        updateCalcDisplay();
+        return;
+      }
+
+      if (key === 'DEL') {
+        calcExpr = calcExpr.slice(0, -1);
+        display.innerText = calcExpr || '0';
+        updateCalcDisplay();
+        return;
+      }
+
+      if (key === '=') {
+        if (!calcExpr) return;
+        try {
+          // Replace operators for safe eval
+          let sanitized = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
+          // Handle % key
+          sanitized = sanitized.replace(/([0-9.]+)\%/g, "($1/100)");
+
+          const result = eval(sanitized);
+          if (result !== undefined && !isNaN(result)) {
+            const resultFormatted = Number.isInteger(result) ? result.toString() : parseFloat(result.toFixed(6)).toString();
+            
+            // Add to History
+            calcHistory.unshift({ expr: calcExpr, res: resultFormatted });
+            if (calcHistory.length > 10) calcHistory.pop();
+            renderCalcHistory();
+
+            display.innerText = resultFormatted;
+            calcExpr = resultFormatted;
+            updateCalcDisplay();
+          }
+        } catch (e) {
+          display.innerText = 'Error';
+        }
+        return;
+      }
+
+      // Appending characters
+      if (key === '*') key = '×';
+      if (key === '/') key = '÷';
+
+      if (display.innerText === '0' && key !== '.' && key !== '%' && key !== '÷' && key !== '×' && key !== '+' && key !== '-') {
+        calcExpr = key;
+      } else {
+        calcExpr += key;
+      }
+      display.innerText = calcExpr;
+      updateCalcDisplay();
+    }
+
+    function renderCalcHistory() {
+      const list = document.getElementById('calc-history-list');
+      if (calcHistory.length === 0) {
+        list.innerHTML = '<div class="text-slate-400 italic text-center py-2">कोई हालिया गणना नहीं है</div>';
+        return;
+      }
+      list.innerHTML = calcHistory.map((item, idx) => `
+        <div onclick="useCalcHistory('${item.res}')" class="flex justify-between items-center p-2 rounded-lg bg-slate-50 hover:bg-slate-100 cursor-pointer transition text-slate-700">
+          <span class="font-medium text-slate-500">${item.expr} =</span>
+          <span class="font-bold text-slate-900">${item.res}</span>
+        </div>
+      `).join('');
+    }
+
+    function useCalcHistory(val) {
+      calcExpr = val;
+      document.getElementById('calc-display').innerText = val;
+      updateCalcDisplay();
+    }
+
+    function clearCalcHistory() {
+      calcHistory = [];
+      renderCalcHistory();
+    }
+
+    // Physical Keyboard Listener for Calculator Tab
+    window.addEventListener('keydown', (e) => {
+      if (currentTab !== 'calc') return;
+      if (e.key >= '0' && e.key <= '9') calcKey(e.key);
+      else if (e.key === '.') calcKey('.');
+      else if (e.key === '+') calcKey('+');
+      else if (e.key === '-') calcKey('-');
+      else if (e.key === '*') calcKey('*');
+      else if (e.key === '/') calcKey('/');
+      else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calcKey('='); }
+      else if (e.key === 'Backspace') calcKey('DEL');
+      else if (e.key === 'Escape') calcKey('AC');
+      else if (e.key === '%') calcKey('%');
+    });
+
+
+    // ==================== TAB 3: AGE CALCULATOR LOGIC ====================
+
+    function initAgeDates() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('age-target').value = today;
+      document.getElementById('age-dob').value = '1995-08-15';
+      calculateAge();
+    }
+
+    function calculateAge() {
+      const dobVal = document.getElementById('age-dob').value;
+      const targetVal = document.getElementById('age-target').value;
+
+      if (!dobVal || !targetVal) return;
+
+      const dob = new Date(dobVal);
+      const target = new Date(targetVal);
+
+      if (dob > target) {
+        document.getElementById('age-years').innerText = '0';
+        document.getElementById('age-months').innerText = '0';
+        document.getElementById('age-days').innerText = '0';
+        document.getElementById('next-bday-text').innerText = 'जन्म तिथि लक्षित तारीख से पहले की होनी चाहिए';
+        return;
+      }
+
+      let y = target.getFullYear() - dob.getFullYear();
+      let m = target.getMonth() - dob.getMonth();
+      let d = target.getDate() - dob.getDate();
+
+      if (d < 0) {
+        m--;
+        // days in previous month of target
+        const prevMonthDate = new Date(target.getFullYear(), target.getMonth(), 0);
+        d += prevMonthDate.getDate();
+      }
+
+      if (m < 0) {
+        y--;
+        m += 12;
+      }
+
+      document.getElementById('age-years').innerText = y;
+      document.getElementById('age-months').innerText = m;
+      document.getElementById('age-days').innerText = d;
+
+      // Next Birthday Calculation
+      let nextBday = new Date(target.getFullYear(), dob.getMonth(), dob.getDate());
+      if (nextBday < target) {
+        nextBday.setFullYear(target.getFullYear() + 1);
+      }
+
+      const diffTime = nextBday - target;
+      const diffDaysTotal = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const nextMonths = Math.floor(diffDaysTotal / 30.4375);
+      const nextDays = Math.floor(diffDaysTotal % 30.4375);
+
+      const daysOfWeekHindi = ['रविवार (Sun)', 'सोमवार (Mon)', 'मंगलवार (Tue)', 'बुधवार (Wed)', 'गुरुवार (Thu)', 'शुक्रवार (Fri)', 'शनिवार (Sat)'];
+      const nextBdayDayName = daysOfWeekHindi[nextBday.getDay()];
+
+      document.getElementById('next-bday-text').innerText = `${nextMonths} महीने और ${nextDays} दिन बाद (${nextBday.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', year: 'numeric' })})`;
+      document.getElementById('next-bday-day').innerText = nextBdayDayName;
+
+      // Detailed Lifetime Stats
+      const totalDiffMs = target - dob;
+      const totalDays = Math.floor(totalDiffMs / (1000 * 60 * 60 * 24));
+      const totalMonths = (y * 12) + m;
+      const totalWeeks = Math.floor(totalDays / 7);
+
+      document.getElementById('stat-months').innerText = totalMonths.toLocaleString('hi-IN');
+      document.getElementById('stat-weeks').innerText = totalWeeks.toLocaleString('hi-IN');
+      document.getElementById('stat-days').innerText = totalDays.toLocaleString('hi-IN');
+      document.getElementById('stat-birth-day').innerText = daysOfWeekHindi[dob.getDay()].split(' ')[0];
+    }
+
+
+    // ==================== TAB 4: WEIGHT CONVERTER & KIRANA ====================
+
+    // Kirana Rate Logic
+    function calcKirana(source = 'grams') {
+      const ratePerKg = parseFloat(document.getElementById('kirana-rate').value) || 0;
+      
+      if (ratePerKg <= 0) {
+        document.getElementById('kirana-out-rs').innerText = '₹0.00';
+        document.getElementById('kirana-out-weight').innerText = '0 Grams';
+        return;
+      }
+
+      if (source === 'grams') {
+        const grams = parseFloat(document.getElementById('kirana-grams').value) || 0;
+        const price = (grams / 1000) * ratePerKg;
+        document.getElementById('kirana-out-rs').innerText = `₹${price.toFixed(2)}`;
+      } else {
+        const rs = parseFloat(document.getElementById('kirana-rs').value) || 0;
+        const weightGrams = (rs / ratePerKg) * 1000;
+        document.getElementById('kirana-out-weight').innerText = `${weightGrams.toFixed(2)} Grams`;
+      }
+    }
+
+    function setKiranaGrams(g) {
+      document.getElementById('kirana-grams').value = g;
+      calcKirana('grams');
+    }
+
+    function setKiranaRs(rs) {
+      document.getElementById('kirana-rs').value = rs;
+      calcKirana('rs');
+    }
+
+    // Universal Weight Converter Logic
+    const weightFactorsInGrams = {
+      kg: 1000,
+      g: 1,
+      mg: 0.001,
+      quintal: 100000,
+      ton: 1000000,
+      lb: 453.59237,
+      oz: 28.349523,
+      tola: 11.6638038,
+      pao: 250,
+      ser: 933.105
+    };
+
+    const weightUnitLabels = {
+      kg: 'किलोग्राम (kg)',
+      g: 'ग्राम (g)',
+      mg: 'मिलीग्राम (mg)',
+      quintal: 'क्विंटल (Quintal)',
+      ton: 'टन (Ton)',
+      lb: 'पाउंड (Pound - lb)',
+      oz: 'औंस (Ounce - oz)',
+      tola: 'तोला (Tola)',
+      pao: 'पाव (Pao)',
+      ser: 'सेर (Ser)'
+    };
+
+    function convertWeight() {
+      const val = parseFloat(document.getElementById('weight-input').value) || 0;
+      const unit = document.getElementById('weight-unit').value;
+
+      // Base grams
+      const totalGrams = val * weightFactorsInGrams[unit];
+
+      const grid = document.getElementById('weight-grid');
+      let gridHTML = '';
+
+      Object.keys(weightFactorsInGrams).forEach(uKey => {
+        const converted = totalGrams / weightFactorsInGrams[uKey];
+        const formattedVal = converted < 0.001 && converted > 0 ? converted.toExponential(3) : (Number.isInteger(converted) ? converted : parseFloat(converted.toFixed(4)));
+
+        const isSelected = uKey === unit;
+
+        gridHTML += `
+          <div class="p-2.5 rounded-xl border ${isSelected ? 'bg-indigo-900 text-white border-indigo-900' : 'bg-slate-50 border-slate-200 text-slate-800'} transition">
+            <div class="text-[10px] ${isSelected ? 'text-indigo-200' : 'text-slate-500'} font-medium truncate">${weightUnitLabels[uKey]}</div>
+            <div class="text-sm sm:text-base font-bold mt-0.5 truncate">${formattedVal}</div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = gridHTML;
+    }
+
+
+    // ==================== TAB 5: LENGTH CONVERTER LOGIC ====================
+
+    const lengthFactorsInMeters = {
+      m: 1,
+      mm: 0.001,
+      cm: 0.01,
+      km: 1000,
+      inch: 0.0254,
+      ft: 0.3048,
+      yard: 0.9144,
+      mile: 1609.344
+    };
+
+    const lengthUnitLabels = {
+      ft: 'फुट (Feet - ft)',
+      m: 'मीटर (Meter - m)',
+      cm: 'सेंटीमीटर (cm)',
+      mm: 'मिलीमीटर (mm)',
+      km: 'किलोमीटर (km)',
+      inch: 'इंच (Inch - in)',
+      yard: 'गज (Yard)',
+      mile: 'मील (Mile)'
+    };
+
+    function convertLength() {
+      const val = parseFloat(document.getElementById('length-input').value) || 0;
+      const unit = document.getElementById('length-unit').value;
+
+      const totalMeters = val * lengthFactorsInMeters[unit];
+
+      const grid = document.getElementById('length-grid');
+      let gridHTML = '';
+
+      Object.keys(lengthFactorsInMeters).forEach(uKey => {
+        const converted = totalMeters / lengthFactorsInMeters[uKey];
+        const formattedVal = Number.isInteger(converted) ? converted : parseFloat(converted.toFixed(4));
+        const isSelected = uKey === unit;
+
+        gridHTML += `
+          <div class="p-3 rounded-xl border ${isSelected ? 'bg-indigo-900 text-white border-indigo-900' : 'bg-slate-50 border-slate-200 text-slate-800'} transition">
+            <div class="text-xs ${isSelected ? 'text-indigo-200' : 'text-slate-500'} font-medium truncate">${lengthUnitLabels[uKey]}</div>
+            <div class="text-base sm:text-lg font-bold mt-0.5 truncate">${formattedVal}</div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = gridHTML;
+    }
+
+    function calcFeetInchToCm() {
+      const ft = parseFloat(document.getElementById('ft-part').value) || 0;
+      const inch = parseFloat(document.getElementById('in-part').value) || 0;
+
+      const totalInches = (ft * 12) + inch;
+      const totalCm = totalInches * 2.54;
+
+      document.getElementById('ft-inch-out-cm').innerText = `${totalCm.toFixed(2)} cm`;
+    }
+
+
+    // ==================== TAB 6: GST & PERCENTAGE LOGIC ====================
+
+    function setGSTMode(mode) {
+      gstMode = mode;
+      const addBtn = document.getElementById('gst-mode-add');
+      const remBtn = document.getElementById('gst-mode-remove');
+
+      if (mode === 'add') {
+        addBtn.className = 'py-2.5 text-xs font-bold rounded-xl transition bg-indigo-900 text-white';
+        remBtn.className = 'py-2.5 text-xs font-bold rounded-xl transition bg-slate-100 text-slate-700 hover:bg-slate-200';
+      } else {
+        remBtn.className = 'py-2.5 text-xs font-bold rounded-xl transition bg-indigo-900 text-white';
+        addBtn.className = 'py-2.5 text-xs font-bold rounded-xl transition bg-slate-100 text-slate-700 hover:bg-slate-200';
+      }
+      calcGST();
+    }
+
+    function setGSTRate(rate) {
+      document.getElementById('gst-rate').value = rate;
+      document.querySelectorAll('.gst-chip').forEach(chip => {
+        chip.classList.remove('bg-indigo-900', 'text-white');
+        chip.classList.add('bg-slate-50', 'text-slate-800');
+      });
+      event.target.classList.add('bg-indigo-900', 'text-white');
+      event.target.classList.remove('bg-slate-50', 'text-slate-800');
+      calcGST();
+    }
+
+    function calcGST() {
+      const amount = parseFloat(document.getElementById('gst-amount').value) || 0;
+      const rate = parseFloat(document.getElementById('gst-rate').value) || 0;
+
+      let baseAmount = 0;
+      let totalGST = 0;
+      let finalTotal = 0;
+
+      if (gstMode === 'add') {
+        baseAmount = amount;
+        totalGST = amount * (rate / 100);
+        finalTotal = amount + totalGST;
+      } else {
+        // Remove GST Mode: Base = Amount / (1 + rate/100)
+        baseAmount = amount / (1 + (rate / 100));
+        totalGST = amount - baseAmount;
+        finalTotal = amount;
+      }
+
+      const cgst = totalGST / 2;
+      const sgst = totalGST / 2;
+      const halfRate = (rate / 2).toFixed(2);
+
+      document.getElementById('gst-out-base').innerText = `₹${baseAmount.toFixed(2)}`;
+      document.getElementById('gst-out-cgst').innerText = `₹${cgst.toFixed(2)}`;
+      document.getElementById('gst-out-sgst').innerText = `₹${sgst.toFixed(2)}`;
+      document.getElementById('gst-cgst-rate').innerText = halfRate;
+      document.getElementById('gst-sgst-rate').innerText = halfRate;
+      document.getElementById('gst-out-tax').innerText = `₹${totalGST.toFixed(2)}`;
+      document.getElementById('gst-out-total').innerText = `₹${finalTotal.toFixed(2)}`;
+    }
+
+    // Quick Percentage Tools
+    function calcPct1() {
+      const val = parseFloat(document.getElementById('pct-val1').value) || 0;
+      const pct = parseFloat(document.getElementById('pct-pct1').value) || 0;
+      const ans = val * (pct / 100);
+      document.getElementById('pct-out1').innerText = `₹${ans.toFixed(2)}`;
+    }
+
+    function calcPct2() {
+      const val = parseFloat(document.getElementById('pct-val2').value) || 0;
+      const total = parseFloat(document.getElementById('pct-total2').value) || 0;
+      if (total <= 0) {
+        document.getElementById('pct-out2').innerText = '0.00%';
+        return;
+      }
+      const ans = (val / total) * 100;
+      document.getElementById('pct-out2').innerText = `${ans.toFixed(2)}%`;
+    }
+
+
+    // --- CLOCK & INITIALIZATION ---
+    function updateLiveTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const dateStr = now.toLocaleDateString('hi-IN', { day: 'numeric', month: 'short' });
+      const el = document.getElementById('live-time');
+      if (el) el.innerText = `${dateStr} | ${timeStr}`;
+    }
+
+    window.onload = function() {
+      setInterval(updateLiveTime, 1000);
+      updateLiveTime();
+
+      // Initialize defaults
+      calcReverseDiscount();
+      calcWholesaleRetail();
+      calcNormalDiscount();
+      initAgeDates();
+      calcKirana('grams');
+      convertWeight();
+      convertLength();
+      calcFeetInchToCm();
+      calcGST();
+      calcPct1();
+      calcPct2();
+    };
+  </script>
+</body>
+</html>
